@@ -79,3 +79,46 @@ func (h *TeamHandler) GetTeam(w http.ResponseWriter, r *http.Request) {
 	// Send response
 	writeJSON(w, http.StatusOK, team)
 }
+
+// Additional functions
+func (h *TeamHandler) GetStatistics(w http.ResponseWriter, r *http.Request) {
+	// Get teams statistics
+	log.Printf("Receiving tems's statistics")
+	statistics, err := h.service.GetTeamsStatistics(r.Context())
+	if err != "" {
+		writeError(w, err)
+		return
+	}
+	log.Printf("Team's statistics received")
+
+	// Send response
+	writeJSON(w, http.StatusOK, statistics)
+}
+
+func (h *TeamHandler) GetTeamStatistics(w http.ResponseWriter, r *http.Request) {
+	// Decode input
+	var teamName models.TeamNameQuery
+
+	if err := json.NewDecoder(r.Body).Decode(&teamName); err != nil {
+		writeErrorMessage(w, errors.ErrorCodeInvalidInput, "Invalid JSON format")
+		return
+	}
+
+	// Validate input
+	if err, msg := ValidateTeamNameQuery(teamName); err != "" {
+		writeErrorMessage(w, err, msg)
+		return
+	}
+
+	// Get team statistics
+	log.Printf("Receiving team statistics: %s", teamName.TeamName)
+	team, err := h.service.GetTeamStatistics(r.Context(), teamName.TeamName)
+	if err != "" {
+		writeError(w, err)
+		return
+	}
+	log.Printf("Team statistics received: %s", team.TeamName)
+
+	// Send response
+	writeJSON(w, http.StatusOK, team)
+}

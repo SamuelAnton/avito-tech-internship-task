@@ -35,6 +35,11 @@ func main() {
 	http.HandleFunc("/pullRequest/merge", prHandler.Merge)
 	http.HandleFunc("/pullRequest/reassign", prHandler.Reassign)
 	http.HandleFunc("/users/getReview", userHandler.GetReview)
+	// Additional functions
+	http.HandleFunc("/users/statistics", userHandler.GetUserStatistics)
+	http.HandleFunc("/users/get", userHandler.GetStatistics)
+	http.HandleFunc("/team/statistics", teamHandler.GetTeamStatistics)
+	http.HandleFunc("/team/count", teamHandler.GetStatistics)
 
 	// Handle HealthCheck
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {

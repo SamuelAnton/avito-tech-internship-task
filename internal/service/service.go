@@ -267,3 +267,50 @@ func (s *Service) Reassign(ctx context.Context, query models.PullRequestReassign
 	}
 	return pr, &candidates[0], ""
 }
+
+// Additional functions
+func (s *Service) GetUsersStatistics(ctx context.Context) (*models.UsersStatistics, errors.ErrorCode) {
+	statistics, err := s.storage.GetUsersStatistics(ctx)
+	if err != nil {
+		return nil, errors.ErrorCodeInternal
+	}
+	return statistics, ""
+}
+
+func (s *Service) GetUserStatistics(ctx context.Context, id string) (*models.UserStats, errors.ErrorCode) {
+	user, err := s.storage.GetUser(ctx, id)
+	if err != nil {
+		return nil, errors.ErrorCodeInternal
+	}
+
+	assignments_count, err := s.storage.GetUserStatistics(ctx, id)
+	if err != nil {
+		return nil, errors.ErrorCodeInternal
+	}
+	return &models.UserStats{
+		UserID:           user.UserID,
+		Username:         user.Username,
+		TeamName:         user.TeamName,
+		IsActive:         user.IsActive,
+		AssignmentsCount: assignments_count,
+	}, ""
+}
+
+func (s *Service) GetTeamsStatistics(ctx context.Context) (*models.TeamsStatistics, errors.ErrorCode) {
+	statistics, err := s.storage.GetTeamsStatistics(ctx)
+	if err != nil {
+		return nil, errors.ErrorCodeInternal
+	}
+	return statistics, ""
+}
+
+func (s *Service) GetTeamStatistics(ctx context.Context, name string) (*models.TeamStats, errors.ErrorCode) {
+	statistics, err := s.storage.GetTeamStatistics(ctx, name)
+	if err != nil {
+		return nil, errors.ErrorCodeInternal
+	}
+	if statistics == nil {
+		return nil, errors.ErrorCodeNotFound
+	}
+	return statistics, ""
+}

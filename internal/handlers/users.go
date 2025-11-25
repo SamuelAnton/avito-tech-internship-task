@@ -82,3 +82,50 @@ func (h *UserHandler) GetReview(w http.ResponseWriter, r *http.Request) {
 		PullRequests: prs,
 	})
 }
+
+// Additional funcitons
+/*
+/users/statistics - get method
+*/
+func (h *UserHandler) GetUserStatistics(w http.ResponseWriter, r *http.Request) {
+	// Get users statistics
+	log.Printf("Receiving user's statistics")
+	statistics, err := h.service.GetUsersStatistics(r.Context())
+	if err != "" {
+		writeError(w, err)
+		return
+	}
+	log.Printf("User's statistics Received")
+
+	// Send response
+	writeJSON(w, http.StatusOK, statistics)
+}
+
+/*
+/users/get - UserIDQuery
+*/
+func (h *UserHandler) GetStatistics(w http.ResponseWriter, r *http.Request) {
+	// Decode input
+	var user models.UserIDQuery
+
+	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
+		writeErrorMessage(w, errors.ErrorCodeInvalidInput, "Invalid JSON format")
+		return
+	}
+
+	// Validate input
+	if err, msg := ValidateUserIDQuery(user); err != "" {
+		writeErrorMessage(w, err, msg)
+		return
+	}
+
+	// Get user's statisstics
+	statistics, err := h.service.GetUserStatistics(r.Context(), user.UserID)
+	if err != "" {
+		writeError(w, err)
+		return
+	}
+
+	// Send response
+	writeJSON(w, http.StatusOK, statistics)
+}

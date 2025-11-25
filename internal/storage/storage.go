@@ -24,4 +24,10 @@ type Storage interface {
 	GetPRsByRewiever(ctx context.Context, userId string) ([]models.PullRequestShort, error)
 
 	Close() error
+
+	// Additional functions
+	GetUsersStatistics(ctx context.Context) (*models.UsersStatistics, error)
+	GetUserStatistics(ctx context.Context, id string) (int, error)
+	GetTeamsStatistics(ctx context.Context) (*models.TeamsStatistics, error)
+	GetTeamStatistics(ctx context.Context, name string) (*models.TeamStats, error)
 }

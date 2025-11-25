@@ -66,3 +66,30 @@ type PullRequest struct {
 	CreatedAt         time.Time  `json:"createdAt,omitempty"`
 	MergedAt          *time.Time `json:"mergedAt,omitempty"`
 }
+
+// Statistic models
+type UserStats struct {
+	UserID           string `json:"user_id"`
+	Username         string `json:"username"`
+	TeamName         string `json:"team_name"`
+	IsActive         bool   `json:"is_active"`
+	AssignmentsCount int    `json:"assignments_count"`
+}
+
+type UsersStatistics struct {
+	TotalUserNumber       int `json:"total_user_number"`
+	TotalActiveUserNumber int `json:"total_active_user_number"`
+}
+
+type TeamStats struct {
+	TeamName                string       `json:"team_name"`
+	MembersTotal            int          `json:"members_total"`
+	Members                 []TeamMember `json:"members"`
+	PullRequestsTotal       int          `json:"pull_requests_total"`
+	ActivePullRequestsTotal int          `json:"active_pull_requests_total"`
+	PullRequests            []string     `json:"pull_requests_id"`
+}
+
+type TeamsStatistics struct {
+	TotalTeamNumber int `json:"total_team_number"`
+}

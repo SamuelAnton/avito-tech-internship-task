@@ -346,3 +346,117 @@ func (p *PostgresStorage) GetPRsByRewiever(ctx context.Context, userId string) (
 
 	return prs, nil
 }
+
+// Additional functions
+func (p *PostgresStorage) GetUsersStatistics(ctx context.Context) (*models.UsersStatistics, error) {
+	var statistics models.UsersStatistics
+
+	err := p.db.QueryRowContext(ctx, `
+		SELECT 
+		(SELECT Count(*) FROM users) as total_user_number,
+		(SELECT Count(is_active) FROM users WHERE is_active = true) as total_active_user_number
+	`).Scan(&statistics.TotalUserNumber, &statistics.TotalActiveUserNumber)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &statistics, nil
+}
+
+func (p *PostgresStorage) GetUserStatistics(ctx context.Context, id string) (int, error) {
+	var assignments_count int
+
+	err := p.db.QueryRowContext(ctx, `
+		SELECT COUNT(pr_id) as assignments_count
+		FROM pr_reviewers
+		WHERE user_id = $1
+	`, id).Scan(&assignments_count)
+	if err != nil {
+		return 0, err
+	}
+
+	return assignments_count, nil
+}
+
+func (p *PostgresStorage) GetTeamsStatistics(ctx context.Context) (*models.TeamsStatistics, error) {
+	var statistics models.TeamsStatistics
+
+	err := p.db.QueryRowContext(ctx, `
+		SELECT Count(*) as total_team_number FROM teams
+	`).Scan(&statistics.TotalTeamNumber)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &statistics, nil
+}
+
+func (p *PostgresStorage) GetTeamStatistics(ctx context.Context, name string) (*models.TeamStats, error) {
+	// Get team
+	team, err := p.GetTeam(ctx, name)
+	if err != nil {
+		return nil, err
+	}
+
+	if team == nil {
+		return nil, nil
+	}
+
+	// Count team members
+	statistics := &models.TeamStats{
+		TeamName:     team.TeamName,
+		Members:      team.Members,
+		MembersTotal: len(team.Members),
+	}
+
+	// Count all prs
+	err = p.db.QueryRowContext(ctx, `
+		SELECT Count(*)
+		FROM pull_requests pr
+		JOIN users u ON pr.author_id = u.user_id
+		WHERE u.team_name = $1
+	`, name).Scan(&statistics.PullRequestsTotal)
+	if err != nil {
+		return nil, err
+	}
+
+	// Count active prs
+	err = p.db.QueryRowContext(ctx, `
+		SELECT Count(*)
+		FROM pull_requests pr
+		JOIN users u ON pr.author_id = u.user_id
+		WHERE u.team_name = $1 AND pr.status = 'OPEN'
+	`, name).Scan(&statistics.ActivePullRequestsTotal)
+	if err != nil {
+		return nil, err
+	}
+
+	// Get snippet of teams's prs ids
+	rows, err := p.db.QueryContext(ctx, `
+		SELECT pr.pull_request_id
+		FROM pull_requests pr
+		JOIN users u ON pr.author_id = u.user_id
+		WHERE u.team_name = $1
+		LIMIT 20
+	`, name)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var prID string
+		if err := rows.Scan(&prID); err != nil {
+			return nil, err
+		}
+		statistics.PullRequests = append(statistics.PullRequests, prID)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return statistics, nil
+}
