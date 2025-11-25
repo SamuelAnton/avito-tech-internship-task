@@ -460,3 +460,25 @@ func (p *PostgresStorage) GetTeamStatistics(ctx context.Context, name string) (*
 
 	return statistics, nil
 }
+
+func (p *PostgresStorage) GetPRStatistics(ctx context.Context) (*models.PullRequestStatistics, error) {
+	var statistics models.PullRequestStatistics
+
+	err := p.db.QueryRowContext(ctx, `
+		SELECT Count(*) as total_pull_request_number FROM pull_requests
+	`).Scan(&statistics.TotalPR)
+
+	if err != nil {
+		return nil, err
+	}
+
+	err = p.db.QueryRowContext(ctx, `
+		SELECT Count(*) as total_pull_request_number FROM pull_requests WHERE status = 'OPEN'
+	`).Scan(&statistics.TotalActivePR)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &statistics, nil
+}

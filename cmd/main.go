@@ -40,6 +40,7 @@ func main() {
 	http.HandleFunc("/users/get", userHandler.GetStatistics)
 	http.HandleFunc("/team/statistics", teamHandler.GetTeamStatistics)
 	http.HandleFunc("/team/count", teamHandler.GetStatistics)
+	http.HandleFunc("/pullRequest/statistics", prHandler.GetStatistics)
 
 	// Handle HealthCheck
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {

@@ -113,3 +113,18 @@ func (h *PRHandler) Reassign(w http.ResponseWriter, r *http.Request) {
 		ReplacedBy: *newCandidate,
 	})
 }
+
+// Additional functions
+func (h *PRHandler) GetStatistics(w http.ResponseWriter, r *http.Request) {
+	// Get teams statistics
+	log.Printf("Receiving Pull Requests' statistics")
+	statistics, err := h.service.GetPRStatistics(r.Context())
+	if err != "" {
+		writeError(w, err)
+		return
+	}
+	log.Printf("Pull Requests' statistics received")
+
+	// Send response
+	writeJSON(w, http.StatusOK, statistics)
+}

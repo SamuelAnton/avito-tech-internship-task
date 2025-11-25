@@ -314,3 +314,11 @@ func (s *Service) GetTeamStatistics(ctx context.Context, name string) (*models.T
 	}
 	return statistics, ""
 }
+
+func (s *Service) GetPRStatistics(ctx context.Context) (*models.PullRequestStatistics, errors.ErrorCode) {
+	statistics, err := s.storage.GetPRStatistics(ctx)
+	if err != nil {
+		return nil, errors.ErrorCodeInternal
+	}
+	return statistics, ""
+}

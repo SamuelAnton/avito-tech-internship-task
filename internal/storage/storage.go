@@ -30,4 +30,5 @@ type Storage interface {
 	GetUserStatistics(ctx context.Context, id string) (int, error)
 	GetTeamsStatistics(ctx context.Context) (*models.TeamsStatistics, error)
 	GetTeamStatistics(ctx context.Context, name string) (*models.TeamStats, error)
+	GetPRStatistics(ctx context.Context) (*models.PullRequestStatistics, error)
 }

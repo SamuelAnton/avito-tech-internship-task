@@ -93,3 +93,8 @@ type TeamStats struct {
 type TeamsStatistics struct {
 	TotalTeamNumber int `json:"total_team_number"`
 }
+
+type PullRequestStatistics struct {
+	TotalPR       int `json:"total_pull_request_number"`
+	TotalActivePR int `json:"total_active_pull_request_number"`
+}
